@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INMOBOX Alessandri · Optimizador de Mix por Tipología</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#0057B8; --blue-deep:#002F6C; --blue-bright:#2E7CE4;
+    --blue-tint:#EAF1FB; --blue-tint2:#F4F8FE; --blue-line:#D6E2F2;
+    --yellow:#FFC629; --yellow-soft:#FFE9A6; --yellow-deep:#B98900;
+    --ink:#0E2238; --ink2:#16324d; --muted:#5E7390; --muted2:#8aa0b4;
+    --bg:#ffffff; --section:#F6F9FD; --good:#0a8a5f; --bad:#c0392b;
+    --disp:'Bricolage Grotesque',system-ui,sans-serif;
+    --sans:'IBM Plex Sans',system-ui,sans-serif;
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+    /* product colors */
+    --c-out:#002F6C; --c-pyme:#2E7CE4; --c-flex:#FFC629;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+  body{min-height:100vh;padding-bottom:64px;
+    background:radial-gradient(900px 380px at 100% -8%, rgba(255,198,41,.10), transparent 60%),
+               radial-gradient(900px 480px at -8% -6%, rgba(0,87,184,.07), transparent 55%), var(--bg);}
+  .wrap{max-width:1300px;margin:0 auto;padding:0 24px}
+  a{color:var(--blue)}
+  header{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--blue-line)}
+  .hd{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:15px 24px;max-width:1300px;margin:0 auto;flex-wrap:wrap}
+  .brand{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .logo{font-family:var(--disp);font-weight:800;font-size:23px;letter-spacing:-.5px;color:var(--blue-deep)}
+  .logo b{color:var(--blue);position:relative}
+  .logo b::after{content:"";position:absolute;left:0;right:0;bottom:1px;height:6px;background:var(--yellow);z-index:-1;opacity:.85}
+  .brand .sub{color:var(--muted);font-size:13px}
+  .ticker{display:flex;gap:16px;font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+  .ticker b{color:var(--blue);font-weight:600}
+  .hero{margin-top:24px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  .hero h1{font-family:var(--disp);font-weight:700;font-size:30px;line-height:1.05;letter-spacing:-.6px;color:var(--blue-deep);max-width:720px}
+  .hero h1 em{font-style:normal;background:linear-gradient(transparent 62%, var(--yellow) 62%);padding:0 3px}
+  .hero p{color:var(--muted);font-size:14px;max-width:680px;margin-top:8px}
+  .pill{font-family:var(--mono);font-size:11px;padding:6px 12px;border-radius:30px;background:var(--blue-tint);color:var(--blue-deep);border:1px solid var(--blue-line);white-space:nowrap}
+  .grid{display:grid;grid-template-columns:374px 1fr;gap:22px;margin-top:22px;align-items:start}
+  @media(max-width:980px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--bg);border:1px solid var(--blue-line);border-radius:16px;padding:20px;box-shadow:0 1px 2px rgba(14,34,56,.04),0 8px 24px rgba(14,34,56,.04)}
+  .card h2{font-family:var(--disp);font-weight:700;font-size:17px;letter-spacing:-.2px;color:var(--blue-deep)}
+  .card .lead{color:var(--muted);font-size:12.5px;margin:3px 0 15px}
+  .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--blue);margin-bottom:8px;font-weight:500}
+  .controls{position:sticky;top:84px}
+  .ctrl{margin-bottom:16px}.ctrl:last-child{margin-bottom:0}
+  .ctrl .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+  .ctrl label{font-size:13px;color:var(--ink);font-weight:600}
+  .ctrl label i{font-style:normal;display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:0}
+  .ctrl .val{font-family:var(--mono);font-size:12.5px;color:var(--blue)}
+  input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:6px;background:linear-gradient(90deg,var(--blue) 0%,var(--blue) var(--p,55%),var(--blue-line) var(--p,55%));outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--yellow);border:3px solid var(--bg);cursor:pointer;box-shadow:0 2px 8px rgba(14,34,56,.28)}
+  input[type=range]::-moz-range-thumb{width:17px;height:17px;border-radius:50%;background:var(--yellow);border:3px solid #fff;cursor:pointer}
+  .mini{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px 10px;margin-top:6px}
+  .mini.two{grid-template-columns:1fr 1fr}
+  .field{display:flex;flex-direction:column;gap:4px}
+  .field span{font-size:10.5px;color:var(--muted)}
+  .field input{background:var(--blue-tint2);border:1px solid var(--blue-line);border-radius:8px;color:var(--ink);font-family:var(--mono);font-size:12.5px;padding:7px 8px;width:100%}
+  .field input:focus{outline:none;border-color:var(--blue);background:#fff}
+  .field input[readonly]{color:var(--blue-deep);font-weight:600;background:#fff}
+  .splitline{height:1px;background:var(--blue-line);margin:15px 0}
+  .btns{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
+  button{font-family:var(--sans);font-weight:700;font-size:13px;border-radius:10px;padding:12px 14px;cursor:pointer;border:1px solid transparent;transition:.15s}
+  .b-prim{background:var(--yellow);color:#3a2c00;flex:1;box-shadow:0 2px 10px rgba(255,198,41,.4)}
+  .b-prim:hover{filter:brightness(1.05)}
+  .b-ghost{background:#fff;border-color:var(--blue-line);color:var(--blue-deep)}
+  .b-ghost:hover{border-color:var(--blue);color:var(--blue)}
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:13px}
+  @media(max-width:980px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{background:#fff;border:1px solid var(--blue-line);border-radius:14px;padding:14px 15px;position:relative;overflow:hidden}
+  .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--blue)}
+  .kpi.y::before{background:var(--yellow)}.kpi.d::before{background:var(--blue-deep)}
+  .kpi .k{font-size:11px;color:var(--muted);min-height:30px}
+  .kpi .n{font-family:var(--mono);font-weight:600;font-size:22px;margin-top:5px;letter-spacing:-.5px;color:var(--blue-deep)}
+  .kpi .u{font-size:11px;color:var(--muted);font-family:var(--sans);font-weight:400}
+  .kpi .dd{font-family:var(--mono);font-size:11px;margin-top:4px;color:var(--muted)}
+  .up{color:var(--good)}.down{color:var(--bad)}
+  .opt{margin-top:22px;border-radius:16px;background:linear-gradient(110deg,var(--blue-deep),var(--blue));color:#fff;padding:21px 24px;display:flex;align-items:center;justify-content:space-between;gap:22px;flex-wrap:wrap;box-shadow:0 10px 30px rgba(0,47,108,.22)}
+  .opt .t{font-family:var(--disp);font-size:19px;font-weight:700}
+  .opt .desc{color:#cfe0f5;font-size:13px;margin-top:4px;max-width:600px}
+  .opt .vbig{font-family:var(--mono);font-weight:600;font-size:27px;color:var(--yellow);text-align:right}
+  .opt .vbig small{display:block;font-family:var(--sans);font-size:11.5px;color:#bcd2ee;font-weight:400}
+  .charts{margin-top:22px;display:grid;gap:22px}
+  svg{width:100%;display:block;overflow:visible}
+  .axislab{fill:var(--muted2);font-family:var(--mono);font-size:10px}
+  .gridln{stroke:var(--blue-line);stroke-width:1;stroke-dasharray:2 4}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--muted)}
+  .legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  @media(max-width:760px){.two{grid-template-columns:1fr}}
+  .section{margin-top:22px}.section .card{padding:22px 24px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--blue-line);vertical-align:middle}
+  th{font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--blue);font-weight:500}
+  td.n,th.n{text-align:right;font-family:var(--mono)}
+  tr:hover td{background:var(--blue-tint2)}
+  tr.best td{background:var(--yellow-soft)!important}
+  tr.best td:first-child{font-weight:700;color:var(--blue-deep)}
+  .score{display:inline-block;font-family:var(--mono);font-weight:600;color:var(--blue-deep);background:var(--yellow-soft);border-radius:6px;padding:1px 7px}
+  .factgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-top:6px}
+  @media(max-width:760px){.factgrid{grid-template-columns:repeat(2,1fr)}}
+  .fact{background:var(--section);border:1px solid var(--blue-line);border-radius:12px;padding:13px 14px}
+  .fact .fn{font-family:var(--mono);font-weight:600;font-size:20px;color:var(--blue-deep);letter-spacing:-.5px}
+  .fact .fl{font-size:11.5px;color:var(--muted);margin-top:3px}
+  .bullets{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:11px 26px;margin-top:8px}
+  @media(max-width:760px){.bullets{grid-template-columns:1fr}}
+  .bullets li{font-size:13px;color:var(--ink2);padding-left:18px;position:relative}
+  .bullets li::before{content:"";position:absolute;left:0;top:7px;width:7px;height:7px;border-radius:2px;background:var(--yellow);border:1px solid var(--yellow-deep)}
+  .bullets li b{color:var(--blue-deep)}
+  .src{font-size:11px;color:var(--muted2);margin-top:16px;line-height:1.65;border-top:1px dashed var(--blue-line);padding-top:12px}
+  .tag{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:20px;border:1px solid var(--blue-line);color:var(--blue);margin-left:8px;vertical-align:middle}
+  .tag.warn{color:var(--yellow-deep);border-color:var(--yellow);background:var(--yellow-soft)}
+  .tag.ok{color:var(--good);border-color:#bfe6d4;background:#e8f7f0}
+  h3.sec{font-family:var(--disp);font-weight:700;font-size:20px;color:var(--blue-deep);margin:2px 0}
+  .sublead{color:var(--muted);font-size:13px;margin-bottom:4px}
+  .chip{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;color:var(--ink2)}
+  .chip b{display:inline-block;width:9px;height:9px;border-radius:2px}
+  .footer{margin-top:30px;color:var(--muted2);font-size:11.5px;text-align:center;line-height:1.6}
+</style>
+</head>
+<body>
+<header>
+  <div class="hd">
+    <div class="brand">
+      <div class="logo">INMO<b>BOX</b> Alessandri</div>
+      <div class="sub">Gran Concepción · Optimizador de mix por tipología</div>
+    </div>
+    <div class="ticker">
+      <span>GLA <b>18.251 m²</b></span>
+      <span>FLEX DISP. CONCEPCIÓN <b>295 m²</b></span>
+      <span>CAP RATE <b id="tk-cap">8,0%</b></span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <h1>Ajuste óptimo de m² por tipología: <em>Outlet · PYME · Flex</em></h1>
+      <p>Cabida actual: 8.183 m² outlet, 5.153 m² bodega PYME (módulos ~1.200 m² con andén para camión de 18 m) y 4.915 m² bodega flex (formato 400–650 m²). El modelo reasigna superficie entre tipologías según la demanda local para maximizar el valor del activo.</p>
+    </div>
+    <span class="pill">Entrega 2 + Inciti/Xbrein 2026 · cabida 18.251 m²</span>
+  </div>
+
+<div class="grid">
+  <!-- CONTROLES -->
+  <div class="card controls">
+    <div class="eyebrow">Palancas · arquitectura adaptativa</div>
+    <h2>Reasignación de GLA</h2>
+    <p class="lead">Las naves permiten fusionar, subdividir o reconvertir módulos. Ajusta Outlet y PYME; <b>Flex</b> ocupa el remanente del paño de bodegas.</p>
+
+    <div class="ctrl">
+      <div class="row"><label><i style="background:var(--c-out)"></i>Outlet / Showroom</label><span class="val" id="v-out">8.183 m²</span></div>
+      <input type="range" id="s-out" min="6000" max="10500" step="100" value="8183">
+    </div>
+    <div class="ctrl">
+      <div class="row"><label><i style="background:var(--c-pyme)"></i>Bodega PYME (1.200 m²)</label><span class="val" id="v-pyme">5.153 m²</span></div>
+      <input type="range" id="s-pyme" min="0" max="9600" step="100" value="5153">
+    </div>
+    <div class="mini">
+      <div class="field"><span>Outlet</span><input id="o-out" readonly></div>
+      <div class="field"><span>PYME</span><input id="o-pyme" readonly></div>
+      <div class="field"><span>Flex</span><input id="o-flex" readonly></div>
+    </div>
+
+    <div class="splitline"></div>
+    <div class="eyebrow">Tarifas de arriendo (UF/m²/mes)</div>
+    <div class="mini">
+      <div class="field"><span>Outlet</span><input type="number" id="i-rout" value="0.50" step="0.01"></div>
+      <div class="field"><span>PYME</span><input type="number" id="i-rpyme" value="0.26" step="0.01"></div>
+      <div class="field"><span>Flex</span><input type="number" id="i-rflex" value="0.30" step="0.01"></div>
+    </div>
+
+    <div class="splitline"></div>
+    <div class="eyebrow">Techo de absorción local (m²)</div>
+    <div class="mini">
+      <div class="field"><span>Outlet</span><input type="number" id="i-dout" value="8200" step="200"></div>
+      <div class="field"><span>PYME</span><input type="number" id="i-dpyme" value="5500" step="200"></div>
+      <div class="field"><span>Flex</span><input type="number" id="i-dflex" value="7000" step="200"></div>
+    </div>
+
+    <div class="splitline"></div>
+    <div class="eyebrow">Supuestos financieros</div>
+    <div class="mini">
+      <div class="field"><span>Vacancia</span><input type="number" id="i-vac" value="0.08" step="0.01"></div>
+      <div class="field"><span>OPEX</span><input type="number" id="i-opex" value="0.12" step="0.01"></div>
+      <div class="field"><span>Cap rate</span><input type="number" id="i-cap" value="0.08" step="0.005"></div>
+    </div>
+    <div class="mini two" style="margin-top:9px">
+      <div class="field"><span>Costo obra (UF/m² GLA)</span><input type="number" id="i-costm2" value="28.89" step="0.5"></div>
+      <div class="field"><span>Precio suelo (UF/m²)</span><input type="number" id="i-land" value="4.0" step="0.1"></div>
+    </div>
+
+    <div class="btns">
+      <button class="b-prim" id="btn-opt">⚡ Optimizar mix</button>
+      <button class="b-ghost" id="btn-base">Cabida actual</button>
+    </div>
+  </div>
+
+  <!-- PANEL PRINCIPAL -->
+  <div>
+    <div class="kpis">
+      <div class="kpi y"><div class="k">Valor estabilizado<br>del activo</div><div class="n" id="k-val">–<span class="u"> UF</span></div><div class="dd" id="k-val-d"></div></div>
+      <div class="kpi"><div class="k">NOI estabilizado<br>(8% vac · 12% opex)</div><div class="n" id="k-noi">–<span class="u"> UF</span></div><div class="dd" id="k-noi-d"></div></div>
+      <div class="kpi d"><div class="k">Yield on cost</div><div class="n" id="k-yoc">–<span class="u">%</span></div><div class="dd" id="k-yoc-d"></div></div>
+      <div class="kpi"><div class="k">Valor residual<br>del suelo</div><div class="n" id="k-res">–<span class="u"> UF/m²</span></div><div class="dd" id="k-res-d"></div></div>
+      <div class="kpi y"><div class="k">m² ociosos por<br>sobreoferta</div><div class="n" id="k-idle">–<span class="u"> m²</span></div><div class="dd" id="k-idle-d"></div></div>
+    </div>
+
+    <div class="opt">
+      <div>
+        <div class="t" id="opt-t">Mix óptimo según demanda</div>
+        <div class="desc" id="opt-desc"></div>
+      </div>
+      <div class="vbig" id="opt-v">– UF<small>uplift de valor vs. cabida actual</small></div>
+    </div>
+
+    <div class="charts">
+      <div class="card">
+        <div class="eyebrow">Frontera de valor · paño de bodegas</div>
+        <h2>Valor según reparto PYME ↔ Flex</h2>
+        <p class="lead">A Outlet fijo en el nivel actual, se desplaza superficie entre PYME (0,26) y Flex (0,30). Flex paga más y tiene demanda más profunda, hasta su techo de absorción.</p>
+        <div id="chart-curve"></div>
+        <div class="legend">
+          <span><i style="background:var(--blue)"></i>Valor ajustado por demanda</span>
+          <span><i style="background:var(--muted2)"></i>Valor a plena ocupación</span>
+          <span><i style="background:var(--yellow)"></i>Óptimo</span>
+          <span><i style="background:var(--ink)"></i>Mix actual</span>
+        </div>
+      </div>
+      <div class="two">
+        <div class="card">
+          <div class="eyebrow">Captura de valor</div>
+          <h2>NOI por tipología</h2>
+          <div id="chart-noi" style="margin-top:10px"></div>
+        </div>
+        <div class="card">
+          <div class="eyebrow">Absorción</div>
+          <h2>Ocupado vs. ocioso</h2>
+          <div id="chart-occ" style="margin-top:10px"></div>
+          <div class="legend"><span><i style="background:var(--blue)"></i>Ocupado</span><span><i style="background:var(--yellow);opacity:.7"></i>Ocioso</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SENSIBILIZACIÓN DE OPCIONES -->
+<div class="section">
+  <div class="card">
+    <div class="eyebrow">Sensibilización de opciones de mix</div>
+    <h3 class="sec">Escenarios de cabida comparados</h3>
+    <p class="sublead">Cada opción se valoriza con los supuestos financieros y de demanda del panel. La fila resaltada es la de mayor valor.</p>
+    <table id="tbl-scn">
+      <thead><tr>
+        <th>Opción</th><th class="n">Outlet</th><th class="n">PYME</th><th class="n">Flex</th>
+        <th class="n">NOI (UF)</th><th class="n">Valor (UF)</th><th class="n">Yield</th><th class="n">Ociosos</th><th class="n">Δ vs actual</th>
+      </tr></thead>
+      <tbody id="scn-body"></tbody>
+    </table>
+    <div class="legend" style="margin-top:14px">
+      <span class="chip"><b style="background:var(--c-out)"></b>Outlet 0,50</span>
+      <span class="chip"><b style="background:var(--c-pyme)"></b>PYME 0,26 · módulos 1.200 m² c/andén</span>
+      <span class="chip"><b style="background:var(--c-flex)"></b>Flex 0,30 · módulos 400–650 m²</span>
+    </div>
+  </div>
+</div>
+
+<!-- SENSIBILIZACIÓN: óptimo según demanda -->
+<div class="section">
+  <div class="card">
+    <div class="eyebrow">Cómo se mueve el óptimo según la demanda</div>
+    <h3 class="sec">Sensibilidad del mix óptimo a los techos de absorción</h3>
+    <p class="sublead">El mix óptimo es muy sensible al supuesto de demanda local — el parámetro a calibrar con un broker de la zona. Outlet y Flex son los drivers; PYME absorbe el remanente.</p>
+    <div class="two">
+      <div>
+        <div class="eyebrow" style="margin-top:6px">Variando techo de absorción de FLEX</div>
+        <table id="tbl-flex"><thead><tr><th>Techo Flex</th><th class="n">Outlet</th><th class="n">PYME</th><th class="n">Flex</th><th class="n">Valor (UF)</th></tr></thead><tbody id="sf-body"></tbody></table>
+      </div>
+      <div>
+        <div class="eyebrow" style="margin-top:6px">Variando techo de absorción de OUTLET</div>
+        <table id="tbl-out"><thead><tr><th>Techo Outlet</th><th class="n">Outlet</th><th class="n">PYME</th><th class="n">Flex</th><th class="n">Valor (UF)</th></tr></thead><tbody id="so-body"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MERCADO -->
+<div class="section">
+  <div class="card">
+    <div class="eyebrow">Lectura de mercado · por qué este mix</div>
+    <h3 class="sec">Oferta y demanda de bodegaje <span class="tag warn" id="mk-state">crear mercado</span></h3>
+    <p class="sublead">Levantamiento competitivo del equipo e Inciti/Xbrein (2026). Editable en el panel.</p>
+    <div class="factgrid">
+      <div class="fact"><div class="fn">239.443 m²</div><div class="fl">Stock arrendable Gran Concepción · 13,3% vacancia</div></div>
+      <div class="fact"><div class="fn">295 m²</div><div class="fl">Disponibilidad flex en la comuna de Concepción (&lt;1%)</div></div>
+      <div class="fact"><div class="fn">0,22–0,30</div><div class="fl">Renta flex de referencia (Megacentro Arauco 0,23 · Arauco II 0,27 · Los Carros 0,30)</div></div>
+      <div class="fact"><div class="fn">82%</div><div class="fl">Concentración en Megacentro · espacio para alternativa urbana mixta</div></div>
+    </div>
+    <ul class="bullets" style="margin-top:18px">
+      <li><b>Flex pequeño (400–650 m²) renta más</b> que PYME logística (0,30 vs 0,26) y tiene <b>demanda profunda</b>: solo 295 m² disponibles en la comuna. Conviene priorizarlo.</li>
+      <li><b>PYME con andén (módulos 1.200 m²)</b> sirve 3PL/distribución; demanda real pero más acotada y de colocación más lenta por el tamaño de módulo.</li>
+      <li><b>Outlet (0,50)</b> es el mayor generador de renta, pero concentra ~59% del ingreso: su techo es la captura de tenants comerciales, no el espacio.</li>
+      <li><b>Regla:</b> Outlet hasta su techo de tenants → Flex hasta donde la demanda local lo absorbe → PYME para el remanente. Mejor renta colocable que renta premium vacía.</li>
+    </ul>
+    <p class="src">La renta de la bodega se defiende por ubicación en Av. Alessandri, formato modular, andenes para 18 m, seguridad y administración profesional. Vacancia bodegaje nacional ~5% al cierre 2025 con nueva oferta ingresando ~60% disponible (CBRE Chile), lo que refuerza preleasing de 35–40% antes de obra y construcción por fases.</p>
+  </div>
+</div>
+
+<!-- CATCHMENT + TENANT MIX -->
+<div class="section two">
+  <div class="card">
+    <div class="eyebrow">Catchment · isócrona 15 min</div>
+    <h3 class="sec">Demanda que sostiene el mix</h3>
+    <div class="factgrid" style="grid-template-columns:1fr 1fr">
+      <div class="fact"><div class="fn">208.759</div><div class="fl">Habitantes Concepción–Hualpén–Talcahuano</div></div>
+      <div class="fact"><div class="fn">82.985</div><div class="fl">Hogares · 93% ocupación · GSE C3</div></div>
+      <div class="fact"><div class="fn">$2,04 MM</div><div class="fl">Gasto mensual por hogar</div></div>
+      <div class="fact"><div class="fn">66%</div><div class="fl">Viviendas tipo casa → consumo volumétrico (hogar, mascotas, aseo)</div></div>
+    </div>
+    <p class="src">Capas Xbrein de mayor intensidad: supermercados ($510k–$776k), conveniencia ($513k–$736k), farmacia ($192k–$317k), comida rápida ($174k–$304k). Alta rotación, stock y cercanía: las mejores anclas para flex + outlet/showroom.</p>
+  </div>
+  <div class="card">
+    <div class="eyebrow">Prospección</div>
+    <h3 class="sec">Segmentos priorizados por tipología</h3>
+    <table>
+      <thead><tr><th>Segmento</th><th class="n">Score</th><th>Tipología</th></tr></thead>
+      <tbody>
+        <tr><td>Conveniencia / supermercados / dark stores</td><td class="n"><span class="score">92</span></td><td>Flex + Outlet</td></tr>
+        <tr><td>Farmacia / salud / belleza</td><td class="n"><span class="score">89</span></td><td>Outlet</td></tr>
+        <tr><td>Hogar / mejoramiento / mascotas</td><td class="n"><span class="score">88</span></td><td>Outlet + Flex</td></tr>
+        <tr><td>Retail omnicanal / pymes e-commerce</td><td class="n"><span class="score">87</span></td><td>Flex 400–650</td></tr>
+        <tr><td>3PL liviano / courier / última milla</td><td class="n"><span class="score">82</span></td><td>PYME 1.200 c/andén</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<p class="footer">INMOBOX Alessandri · Gran Concepción — Optimizador de mix por tipología (Outlet · PYME · Flex). Modelo coherente con la Entrega 2 (Equipo 2): inversión sin terreno = GLA × costo de obra; Valor = NOI ajustado / cap rate. Complementado con el Informe de Clientes Potenciales Inciti/Xbrein (2026). Los techos de absorción son supuestos de demanda local, editables: ahí se concentra el valor en juego.</p>
+</div>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const fmt=(n,d=0)=>n.toLocaleString('es-CL',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtUF=n=>fmt(Math.round(n));
+const TERR_M2=41795;
+
+function P(){return{
+  total:18251.16,
+  rOut:+$('i-rout').value, rPyme:+$('i-rpyme').value, rFlex:+$('i-rflex').value,
+  dOut:+$('i-dout').value, dPyme:+$('i-dpyme').value, dFlex:+$('i-dflex').value,
+  vac:+$('i-vac').value, opex:+$('i-opex').value, cap:+$('i-cap').value,
+  costM2:+$('i-costm2').value, land:+$('i-land').value };}
+
+function model(outArea,pymeArea,p){
+  const flexArea=Math.max(0,p.total-outArea-pymeArea);
+  const occ=(A,D,v)=>Math.min(Math.max(A,0),D)*(1-v);
+  const oO=occ(outArea,p.dOut,p.vac), oP=occ(pymeArea,p.dPyme,p.vac), oF=occ(flexArea,p.dFlex,p.vac);
+  const k=12*(1-p.opex);
+  const nO=oO*p.rOut*k, nP=oP*p.rPyme*k, nF=oF*p.rFlex*k;
+  const NOI=nO+nP+nF, value=NOI/p.cap;
+  const noiPot=(Math.max(outArea,0)*p.rOut+Math.max(pymeArea,0)*p.rPyme+flexArea*p.rFlex)*k, valuePot=noiPot/p.cap;
+  const inv=p.total*p.costM2, terr=p.land*TERR_M2, cost=inv+terr;
+  const idle=(Math.max(outArea,0)-oO)+(Math.max(pymeArea,0)-oP)+(flexArea-oF);
+  return {outArea:Math.max(outArea,0),pymeArea:Math.max(pymeArea,0),flexArea,oO,oP,oF,nO,nP,nF,NOI,value,valuePot,inv,cost,
+          yoc:NOI/cost,idle,resid:value-inv,residM2:(value-inv)/TERR_M2,margin:value-cost,
+          incShareOut:nO/(NOI||1)};
+}
+function optimize(p){let b=null;
+  for(let o=6000;o<=10500;o+=250)for(let py=0;py<=p.total-o;py+=250){const r=model(o,py,p);if(!b||r.value>b.r.value)b={o,py,r};}
+  return b;}
+
+let state={out:8183,pyme:5153.16};
+
+function render(){
+  const p=P();
+  $('tk-cap').textContent=fmt(p.cap*100,1)+'%';
+  // clamp
+  state.out=Math.min(Math.max(state.out,6000),10500);
+  if(state.out+state.pyme>p.total)state.pyme=p.total-state.out;
+  if(state.pyme<0)state.pyme=0;
+  $('s-out').value=state.out; $('s-pyme').max=Math.round(p.total-state.out); $('s-pyme').value=Math.min(state.pyme,p.total-state.out);
+  $('s-out').style.setProperty('--p',((state.out-6000)/(10500-6000)*100)+'%');
+  $('s-pyme').style.setProperty('--p',(state.pyme/(p.total-state.out||1)*100)+'%');
+
+  const cur=model(state.out,state.pyme,p);
+  const base=model(8183,5153.16,p);
+  const opt=optimize(p);
+
+  $('v-out').textContent=fmt(cur.outArea,0)+' m²';
+  $('v-pyme').textContent=fmt(cur.pymeArea,0)+' m² · '+Math.round(cur.pymeArea/1200)+' mód.';
+  $('o-out').value=fmt(cur.outArea,0);
+  $('o-pyme').value=fmt(cur.pymeArea,0);
+  $('o-flex').value=fmt(cur.flexArea,0)+'  (~'+Math.round(cur.flexArea/525)+' mód.)';
+
+  $('k-val').innerHTML=fmtUF(cur.value)+'<span class="u"> UF</span>';
+  $('k-val-d').innerHTML=arrow(cur.value-base.value)+' vs actual';
+  $('k-noi').innerHTML=fmtUF(cur.NOI)+'<span class="u"> UF</span>';
+  $('k-noi-d').innerHTML='outlet '+fmt(cur.incShareOut*100,0)+'% del ingreso';
+  $('k-yoc').innerHTML=fmt(cur.yoc*100,1)+'<span class="u">%</span>';
+  $('k-yoc-d').innerHTML=(cur.yoc>p.cap?'<span class="up">sobre cap '+fmt(p.cap*100,1)+'%</span>':'<span class="down">bajo cap rate</span>');
+  $('k-res').innerHTML=fmt(cur.residM2,2)+'<span class="u"> UF/m²</span>';
+  $('k-res-d').innerHTML='suelo: '+fmtUF(cur.resid)+' UF';
+  $('k-idle').innerHTML=fmtUF(cur.idle)+'<span class="u"> m²</span>';
+  $('k-idle-d').innerHTML=fmt(cur.idle/p.total*100,1)+'% del GLA';
+
+  const upl=opt.r.value-base.value;
+  $('opt-t').textContent='Óptimo: Outlet '+fmt(opt.r.outArea,0)+' · PYME '+fmt(opt.r.pymeArea,0)+' ('+Math.round(opt.r.pymeArea/1200)+' mód.) · Flex '+fmt(opt.r.flexArea,0)+' m²';
+  let why;
+  const dP=opt.r.pymeArea-base.pymeArea, dF=opt.r.flexArea-base.flexArea;
+  if(dF>300 && dP<-300)
+    why='Reasignar ~'+fmtUF(Math.abs(dP))+' m² de PYME logística hacia Flex pequeño: Flex paga más (0,30 vs 0,26) y su demanda local es más profunda (295 m² disponibles). Outlet se mantiene en su techo de tenants.';
+  else if(dP>300)
+    why='La demanda de Flex se satura antes que la de PYME: conviene cargar más superficie en módulos PYME con andén.';
+  else
+    why='La cabida actual está cerca del óptimo dado el techo de absorción ingresado. El valor en juego se revela al estresar la demanda de cada tipología.';
+  $('opt-desc').textContent=why;
+  $('opt-v').innerHTML=(upl>=0?'+':'')+fmtUF(upl)+' UF<small>uplift de valor vs. cabida actual</small>';
+
+  const pill=$('mk-state');
+  if(p.dOut<7000){pill.textContent='riesgo outlet';pill.className='tag warn';}
+  else if((p.dOut+p.dPyme+p.dFlex)-p.total>2000){pill.textContent='demanda holgada';pill.className='tag ok';}
+  else {pill.textContent='crear mercado';pill.className='tag warn';}
+
+  buildScenarios(p,base,opt);
+  buildSens(p);
+  drawCurve(p,cur,opt);
+  drawNoi(cur); drawOcc(cur);
+}
+function arrow(d){return d>=0?'<span class="up">▲ +'+fmtUF(d)+'</span>':'<span class="down">▼ '+fmtUF(d)+'</span>';}
+
+function buildScenarios(p,base,opt){
+  const T=p.total;
+  const scn=[
+    ['Cabida actual (propuesta)',8183,5153.16],
+    ['Óptimo (demanda base)',opt.r.outArea,opt.r.pymeArea],
+    ['Flex-intensivo (demanda profunda)',8200,2400],
+    ['PYME-logístico (3PL fuerte)',8200,6000],
+    ['Outlet prudente (preleasing parcial)',6800,4800],
+  ];
+  const rows=scn.map(s=>{const r=model(s[1],s[2],p);return {name:s[0],r};});
+  const baseV=base.value;
+  let maxV=-1e18; rows.forEach(x=>{if(x.r.value>maxV)maxV=x.r.value;});
+  $('scn-body').innerHTML=rows.map(x=>{
+    const d=x.r.value-baseV;
+    const best=Math.abs(x.r.value-maxV)<1?' class="best"':'';
+    return `<tr${best}><td>${x.name}</td>`+
+      `<td class="n">${fmtUF(x.r.outArea)}</td><td class="n">${fmtUF(x.r.pymeArea)}</td><td class="n">${fmtUF(x.r.flexArea)}</td>`+
+      `<td class="n">${fmtUF(x.r.NOI)}</td><td class="n">${fmtUF(x.r.value)}</td>`+
+      `<td class="n">${fmt(x.r.yoc*100,1)}%</td><td class="n">${fmtUF(x.r.idle)}</td>`+
+      `<td class="n">${d>=0?'+':''}${fmtUF(d)}</td></tr>`;
+  }).join('');
+}
+
+function buildSens(p){
+  const fset=[4915,5500,6500,7000,8000];
+  $('sf-body').innerHTML=fset.map(df=>{const o=optimize({...p,dFlex:df});
+    return `<tr><td class="n">${fmtUF(df)}</td><td class="n">${fmtUF(o.r.outArea)}</td><td class="n">${fmtUF(o.r.pymeArea)}</td><td class="n">${fmtUF(o.r.flexArea)}</td><td class="n">${fmtUF(o.r.value)}</td></tr>`;
+  }).join('');
+  const oset=[6000,7000,8200,9000,10000];
+  $('so-body').innerHTML=oset.map(dou=>{const o=optimize({...p,dOut:dou});
+    return `<tr><td class="n">${fmtUF(dou)}</td><td class="n">${fmtUF(o.r.outArea)}</td><td class="n">${fmtUF(o.r.pymeArea)}</td><td class="n">${fmtUF(o.r.flexArea)}</td><td class="n">${fmtUF(o.r.value)}</td></tr>`;
+  }).join('');
+}
+
+// ---- charts ----
+function drawCurve(p,cur,opt){
+  const W=880,H=300,L=72,R=20,T=18,B=44,w=W-L-R,h=H-T-B;
+  const pool=p.total-cur.outArea; const N=60;
+  const pts=[],pot=[];
+  for(let i=0;i<=N;i++){const py=pool*i/N;const r=model(cur.outArea,py,p);pts.push([py,r.value]);pot.push([py,r.valuePot]);}
+  const ally=pts.concat(pot).map(d=>d[1]);
+  let ymin=Math.min(...ally),ymax=Math.max(...ally);const pad=(ymax-ymin)*0.12||1;ymin-=pad;ymax+=pad;
+  const X=a=>L+(a/pool)*w, Y=v=>T+h-((v-ymin)/(ymax-ymin))*h;
+  const path=d=>d.map((q,i)=>(i?'L':'M')+X(q[0]).toFixed(1)+' '+Y(q[1]).toFixed(1)).join(' ');
+  let g='';
+  for(let i=0;i<=4;i++){const v=ymin+(ymax-ymin)*i/4,y=Y(v);
+    g+=`<line class="gridln" x1="${L}" y1="${y}" x2="${W-R}" y2="${y}"/><text class="axislab" x="${L-8}" y="${y+3}" text-anchor="end">${fmtUF(v)}</text>`;}
+  for(let i=0;i<=6;i++){const a=pool*i/6,x=X(a);g+=`<text class="axislab" x="${x}" y="${H-B+18}" text-anchor="middle">${fmt(a/1000,1)}k</text>`;}
+  g+=`<text class="axislab" x="${L+w/2}" y="${H-4}" text-anchor="middle" style="font-size:11px">Superficie PYME (m²) · Flex = remanente</text>`;
+  g+=`<path d="${path(pot)}" fill="none" stroke="var(--muted2)" stroke-width="1.5" stroke-dasharray="4 4" opacity=".75"/>`;
+  const area=path(pts)+` L ${X(pool)} ${T+h} L 0 ${T+h} Z`.replace('L 0',`L ${X(0)}`);
+  g+=`<defs><linearGradient id="bg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--blue)" stop-opacity=".22"/><stop offset="1" stop-color="var(--blue)" stop-opacity="0"/></linearGradient></defs>`;
+  g+=`<path d="${area}" fill="url(#bg)"/><path d="${path(pts)}" fill="none" stroke="var(--blue)" stroke-width="2.6"/>`;
+  // optimum (only meaningful at opt outlet ~ cur; mark opt pyme if outlet≈)
+  const ox=X(Math.min(opt.r.pymeArea,pool)),oy=Y(model(cur.outArea,Math.min(opt.r.pymeArea,pool),p).value);
+  g+=`<line x1="${ox}" y1="${T}" x2="${ox}" y2="${T+h}" stroke="var(--yellow-deep)" stroke-width="1" stroke-dasharray="3 3" opacity=".7"/>`;
+  g+=`<circle cx="${ox}" cy="${oy}" r="7" fill="var(--yellow)" stroke="#7a5c00" stroke-width="1.5"/><text class="axislab" x="${ox}" y="${oy-13}" text-anchor="middle" style="fill:var(--yellow-deep);font-weight:600">óptimo</text>`;
+  const cx=X(Math.min(cur.pymeArea,pool)),cy=Y(cur.value);
+  g+=`<circle cx="${cx}" cy="${cy}" r="5.5" fill="var(--ink)" stroke="#fff" stroke-width="2"/>`;
+  $('chart-curve').innerHTML=`<svg viewBox="0 0 ${W} ${H}">${g}</svg>`;
+}
+function drawNoi(cur){
+  const rows=[['Outlet',cur.nO,'var(--c-out)'],['PYME',cur.nP,'var(--c-pyme)'],['Flex',cur.nF,'var(--c-flex)']];
+  const W=400,H=170,L=64,R=72,T=10,B=10,w=W-L-R,rowH=(H-T-B)/rows.length;
+  const max=Math.max(...rows.map(r=>r[1]))||1;let g='';
+  rows.forEach((r,i)=>{const y=T+i*rowH+rowH*0.24,bh=rowH*0.46,bw=Math.max(0,r[1]/max*w);
+    g+=`<text class="axislab" x="${L-8}" y="${y+bh*0.7}" text-anchor="end" style="font-size:11.5px;fill:var(--ink)">${r[0]}</text>`;
+    g+=`<rect x="${L}" y="${y}" width="${bw.toFixed(1)}" height="${bh}" rx="4" fill="${r[2]}"/>`;
+    const pct=cur.NOI?Math.round(r[1]/cur.NOI*100):0;
+    g+=`<text class="axislab" x="${L+bw+6}" y="${y+bh*0.7}" style="fill:var(--muted)">${fmtUF(r[1])} · ${pct}%</text>`;});
+  $('chart-noi').innerHTML=`<svg viewBox="0 0 ${W} ${H}">${g}</svg>`;
+}
+function drawOcc(cur){
+  const rows=[['Outlet',cur.oO,cur.outArea-cur.oO],['PYME',cur.oP,cur.pymeArea-cur.oP],['Flex',cur.oF,cur.flexArea-cur.oF]];
+  const W=400,H=170,L=58,R=64,T=10,B=10,w=W-L-R,rowH=(H-T-B)/rows.length;
+  const max=Math.max(...rows.map(r=>r[1]+r[2]))||1;let g='';
+  rows.forEach((r,i)=>{const y=T+i*rowH+rowH*0.24,bh=rowH*0.46,wo=r[1]/max*w,wv=r[2]/max*w;
+    g+=`<text class="axislab" x="${L-8}" y="${y+bh*0.7}" text-anchor="end" style="font-size:11.5px;fill:var(--ink)">${r[0]}</text>`;
+    g+=`<rect x="${L}" y="${y}" width="${wo.toFixed(1)}" height="${bh}" rx="4" fill="var(--blue)"/>`;
+    if(wv>0.5)g+=`<rect x="${(L+wo).toFixed(1)}" y="${y}" width="${wv.toFixed(1)}" height="${bh}" rx="4" fill="var(--yellow)" opacity=".75"/>`;
+    g+=`<text class="axislab" x="${L+wo+wv+6}" y="${y+bh*0.7}" style="fill:var(--muted)">${fmtUF(r[1]+r[2])} m²</text>`;});
+  $('chart-occ').innerHTML=`<svg viewBox="0 0 ${W} ${H}">${g}</svg>`;
+}
+
+// events
+$('s-out').addEventListener('input',e=>{state.out=+e.target.value;render();});
+$('s-pyme').addEventListener('input',e=>{state.pyme=+e.target.value;render();});
+['i-rout','i-rpyme','i-rflex','i-dout','i-dpyme','i-dflex','i-vac','i-opex','i-cap','i-costm2','i-land'].forEach(id=>$(id).addEventListener('input',render));
+$('btn-opt').addEventListener('click',()=>{const o=optimize(P());state.out=o.r.outArea;state.pyme=o.r.pymeArea;render();});
+$('btn-base').addEventListener('click',()=>{state.out=8183;state.pyme=5153.16;render();});
+render();
+</script>
+</body>
+</html>
