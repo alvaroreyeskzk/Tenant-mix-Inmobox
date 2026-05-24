@@ -184,18 +184,6 @@
       <div class="field"><span>Flex</span><input type="number" id="i-dflex" value="7000" step="200"></div>
     </div>
 
-    <div class="splitline"></div>
-    <div class="eyebrow">Supuestos financieros</div>
-    <div class="mini">
-      <div class="field"><span>Vacancia</span><input type="number" id="i-vac" value="0.08" step="0.01"></div>
-      <div class="field"><span>OPEX</span><input type="number" id="i-opex" value="0.12" step="0.01"></div>
-      <div class="field"><span>Cap rate</span><input type="number" id="i-cap" value="0.08" step="0.005"></div>
-    </div>
-    <div class="mini two" style="margin-top:9px">
-      <div class="field"><span>Costo obra (UF/m² GLA)</span><input type="number" id="i-costm2" value="28.89" step="0.5"></div>
-      <div class="field"><span>Precio suelo (UF/m²)</span><input type="number" id="i-land" value="4.0" step="0.1"></div>
-    </div>
-
     <div class="btns">
       <button class="b-prim" id="btn-opt">⚡ Optimizar mix</button>
       <button class="b-ghost" id="btn-base">Cabida actual</button>
@@ -355,8 +343,7 @@ function P(){return{
   total:18251.16,
   rOut:+$('i-rout').value, rPyme:+$('i-rpyme').value, rFlex:+$('i-rflex').value,
   dOut:+$('i-dout').value, dPyme:+$('i-dpyme').value, dFlex:+$('i-dflex').value,
-  vac:+$('i-vac').value, opex:+$('i-opex').value, cap:+$('i-cap').value,
-  costM2:+$('i-costm2').value, land:+$('i-land').value };}
+  vac:0.08, opex:0.12, cap:0.08, costM2:28.89, land:4.0 };}
 
 function model(outArea,pymeArea,p){
   const flexArea=Math.max(0,p.total-outArea-pymeArea);
@@ -522,7 +509,7 @@ function drawOcc(cur){
 // events
 $('s-out').addEventListener('input',e=>{state.out=+e.target.value;render();});
 $('s-pyme').addEventListener('input',e=>{state.pyme=+e.target.value;render();});
-['i-rout','i-rpyme','i-rflex','i-dout','i-dpyme','i-dflex','i-vac','i-opex','i-cap','i-costm2','i-land'].forEach(id=>$(id).addEventListener('input',render));
+['i-rout','i-rpyme','i-rflex','i-dout','i-dpyme','i-dflex'].forEach(id=>$(id).addEventListener('input',render));
 $('btn-opt').addEventListener('click',()=>{const o=optimize(P());state.out=o.r.outArea;state.pyme=o.r.pymeArea;render();});
 $('btn-base').addEventListener('click',()=>{state.out=8183;state.pyme=5153.16;render();});
 render();
